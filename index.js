@@ -13,7 +13,7 @@ const updateChannel = async () => {
     // Fetch statistics from mcapi.us
     const res = await fetch(`https://api.minetools.eu/query/${config.ipAddress}/${config.port}`)
     const res1 = await fetch(`https://api.mcsrvstat.us/bedrock/2/${config.ipAddress}:${config.port}`)
-    if (!res) {
+    if (!res1) {
         const statusChannelName = `【🛡】Status: Offline`
         client.channels.cache.get(config.statusChannel).setName(statusChannelName)
         return false
