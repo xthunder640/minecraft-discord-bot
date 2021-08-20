@@ -11,7 +11,8 @@ const config = require('./config.json')
 const updateChannel = async () => {
 
     // Fetch statistics from mcapi.us
-    const res = await fetch(`https://mcapi.us/server/status?ip=${config.ipAddress}${config.port ? `&port=${config.port}` : ''}`)
+    const res = await fetch(`https://api.minetools.eu/query/${config.ipAddress}/${config.port}`)
+    const res1 = await fetch(`https://api.mcsrvstat.us/bedrock/2/${config.ipAddress}:${config.port}`)
     if (!res) {
         const statusChannelName = `【🛡】Status: Offline`
         client.channels.cache.get(config.statusChannel).setName(statusChannelName)
@@ -19,12 +20,13 @@ const updateChannel = async () => {
     }
     // Parse the mcapi.us response
     const body = await res.json()
+    const body1 = await res1.json()
 
     // Get the current player count, or set it to 0
-    const players = body.players.now
+    const players = body.Players
 
     // Get the server status
-    const status = (body.online ? "Online" : "Offline")
+    const status = (body1.online ? "Online" : "Offline")
 
     // Generate channel names
     const playersChannelName = `【👥】Players: ${players}`
@@ -59,10 +61,12 @@ client.on('message', async (message) => {
         const sentMessage = await message.channel.send("Fetching statistics, please wait...")
 
         // Fetch statistics from mcapi.us
-        const res = await fetch(`https://mcapi.us/server/status?ip=${config.ipAddress}${config.port ? `&port=${config.port}` : ''}`)
+        const res = await fetch(`https://api.minetools.eu/query/${config.ipAddress}/${config.port}`)
+        const res1 = await fetch(`https://api.mcsrvstat.us/bedrock/2/${config.ipAddress}:${config.port}`)
         if (!res) return message.channel.send(`Looks like your server is not reachable... Please verify it's online and it isn't blocking access!`)
         // Parse the mcapi.us response
         const body = await res.json()
+        const body1 = await res1.json()
 
         const attachment = new Discord.MessageAttachment(Buffer.from(body.favicon.substr('data:image/png;base64,'.length), 'base64'), "icon.png")
 
@@ -70,10 +74,10 @@ client.on('message', async (message) => {
             .setAuthor(config.ipAddress)
             .attachFiles(attachment)
             .setThumbnail("attachment://icon.png")
-            .addField("Version", body.server.name)
-            .addField("Connected", `${body.players.now} players`)
-            .addField("Maximum", `${body.players.max} players`)
-            .addField("Status", (body.online ? "Online" : "Offline"))
+            .addField("Version", body.Version)
+            .addField("Connected", `${body.Players} players`)
+            .addField("Maximum", `${body.MaxPlayers} players`)
+            .addField("Status", (body1.online ? "Online" : "Offline"))
             .setColor("#FF0000")
             .setFooter("Open Source Minecraft Discord Bot")
         
